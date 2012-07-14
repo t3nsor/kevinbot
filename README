@@ -2,7 +2,7 @@ README - kevinbot v0.9
 -------------------------------------------------------------------------------
 This is an open beta of kevinbot, an bot for moderating the game of "Mafia" or
 "Werewolves" over IRC. It has not been thoroughly tested. It does not support
-HTTPS (for a workaround, consider stunnel). It also does not adhere to sound
+TLS/SSL (for a workaround, consider stunnel). It also does not adhere to sound
 principles of Python programming or object-oriented design. Furthermore, it
 probably does not work on Python 3. These things are left for v1.0 :)
 
