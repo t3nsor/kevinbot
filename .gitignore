@@ -1,0 +1,6 @@
+*~
+*.pyc
+kevinbot
+kevinbot.pid
+nohup.out
+settings.json

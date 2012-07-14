@@ -1,0 +1,8 @@
+{
+    "host": "irc.wcipeg.com",
+    "port": 6667,
+    "nick": "kevinbot",
+    "password": "hunter2",
+    "admins": ["brian"],
+    "channels": ["#mafia"]
+}
