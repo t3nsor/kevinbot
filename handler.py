@@ -5,6 +5,10 @@ from constants import VERSION, HELP_URL
 from kevinbot import KevinBotGM
 
 class KevinBotCommandHandler(DefaultCommandHandler):
+    def __abort(self):
+        for chan in self.channels:
+            self.client.send('MODE %s -m' % chan)
+
     def __init__(self, client, settings):
         self.client = client
         self.settings = settings
@@ -21,8 +25,7 @@ class KevinBotCommandHandler(DefaultCommandHandler):
                 pass
 
     def __sighandler(self, signalnum, *args):
-        for chan in self.channels:
-            self.client.send('MODE %s -m' % chan)
+        self.__abort()
         self.client.send('QUIT :Caught signal %d' % signalnum)
         exit(1)
 
@@ -33,10 +36,15 @@ class KevinBotCommandHandler(DefaultCommandHandler):
         self.channels[chan]._endofnames()
 
     def invite(self, nickhost, target, chan):
-        if target == self.my_nick and not chan in self.channels:
-            self.channels[chan] = KevinBotGM(self, chan)
+        nick, host = nickhost.split('!')
+        if nick in self.settings['admins']:
+            if target == self.my_nick and not chan in self.channels:
+                self.channels[chan] = KevinBotGM(self, chan)
+            else:
+                pass # TODO: figure out whether this can happen
         else:
-            pass # can this even happen?
+            helpers.msg(self.client, nick, 'Only a kevinbot admin can ' +
+                                           'add channels.')
 
     def join(self, nickhost, chan):
         nick, host = nickhost.split('!')
@@ -85,11 +93,18 @@ class KevinBotCommandHandler(DefaultCommandHandler):
             return
         nick, host = nickhost.split('!')
         if chan == self.my_nick: # user private message
-            # Always respond to !version, !help directly
+            # Always respond to !version, !help, !die directly
             if msg == '!version':
                 helpers.msg(self.client, nick, VERSION)
             elif msg == '!help' or msg.startswith('!help '):
                 helpers.msg(self.client, nick, HELP_URL)
+            elif msg == '!die':
+                if nick in self.settings['admins']:
+                    self.__abort()
+                    self.client.send('QUIT :Killed by admin')
+                    exit(0)
+                else:
+                    helpers.msg(self.client, nick, 'Not authorized!')
             else:
                 # The !abort and !kick commands require a channel argument.
                 # The !quit and !role commands do not.
