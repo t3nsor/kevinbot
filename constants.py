@@ -24,6 +24,7 @@ OPT_NUM_DOCTORS = 'n_doctors'
 OPT_NUM_INSPECTORS = 'n_detectives'
 OPT_NUM_IDIOTS = 'n_idiots'
 OPT_NUM_MAFIA = 'n_mafia'
+OPT_SELF_PROTECTING_DOCTOR = 'self_protection'
 # ... and values
 NUM_MAFIA_AUTO1 = 'auto'
 

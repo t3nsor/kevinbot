@@ -240,6 +240,8 @@ class KevinBotGM:
                 num = int(value)
                 if num < 0 or num == 0 and setting == OPT_NUM_MAFIA:
                     raise KevinBotArgumentException()
+                if num > 1 and setting == OPT_SELF_PROTECTING_DOCTOR:
+                    raise KevinBotArgumentException()
                 self.settings[setting] = num
             except ValueError:
                 raise KevinBotArgumentException()
@@ -492,7 +494,8 @@ class KevinBotGM:
                 return
             if len(words) == 2 and words[0] == 'SAVE':
                 target = words[1]
-                if target == nick:
+                if (target == nick and
+                    not self.settings[OPT_SELF_PROTECTING_DOCTOR]):
                     self.privmsg(nick, 'You cannot save yourself.')
                 elif target in self.players:
                     self.players[nick].vote = target
@@ -527,7 +530,8 @@ class KevinBotGM:
             self.settings = {OPT_NUM_DOCTORS: 1,
                              OPT_NUM_INSPECTORS: 1,
                              OPT_NUM_IDIOTS: 0,
-                             OPT_NUM_MAFIA: NUM_MAFIA_AUTO1}
+                             OPT_NUM_MAFIA: NUM_MAFIA_AUTO1,
+                             OPT_SELF_PROTECTING_DOCTOR: 1}
             self.creator = nick
             self.echo('Game created by %s' % nick)
         else:
