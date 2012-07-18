@@ -350,7 +350,7 @@ class KevinBotGM:
         buf = []
         bufSize = 0
         for nick in self.players:
-            if bufSize + len(nick) + 2 > 400:
+            if bufSize + len(nick) + 2 > 400 or len(buf) >= 3:
                 self.voiceAllHelper(buf, sign)
                 bufSize = 0
                 buf = []
@@ -443,13 +443,14 @@ class KevinBotGM:
           !quit: removes yourself from the game
         Also, the command !role should always be private-messaged, because the
         reply will always be a private message.
+        The command !list was added due to beta test feedback.
         '''
         if self.busy:
             return
         words = msg.split()
         if len(words) == 0:
             return
-        if words[0] in ['!abort', '!kick', '!quit', '!role']:
+        if words[0] in ['!abort', '!kick', '!quit', '!role', '!list']:
             self.is_private_command = True
             try:
                 getattr(self, 'c_' + words[0][1:])(nick, *words[1:])
@@ -587,9 +588,10 @@ class KevinBotGM:
         if len(args) > 0:
             raise KevinBotArgumentException()
         if self.state == ST_INACTIVE:
-            self.replyto(nick, 'No active game.')
+            self.replyto(nick, 'No active game.', self.is_private_command)
         else:
-            self.echo(', '.join(self.players.keys()))
+            self.replyto(nick, ', '.join(self.players.keys()),
+                         self.is_private_command)
 
     def c_kick(self, nick, *args):
         if len(args) != 1:
