@@ -753,8 +753,36 @@ class KevinBotGM:
                     'Perhaps you meant to !quit the game that is in ' +
                     'progress.')
 
+    def c_vlist(self, nick, *args):
+        if len(args) > 0:
+            raise KevinBotArgumentException()
+        if self.state == ST_DAY:
+            # The coder still thinks he's writing C++...
+            a = []
+            b = {}
+            c = []
+            for p in self.players:
+                b[p] = len(a)
+                a.append((p, []))
+            b[ENT_NONE] = len(a)
+            a.append((ENT_NONE, []))
+            for n, p in .players.items():
+                if p.vote:
+                    a[b[p.vote]][1].append(n)
+                else:
+                    c.append(n)
+            a.sort(lambda x, y: -cmp(len(x[1]), len(y[1])))
+            for e in a:
+                if len(e[1]) == 0:
+                    break
+                self.echo('Votes for %s by %s' % (e[0], ', '.join(e[1])))
+            if len(c):
+                self.echo('No votes from ' + ', '.join(c))
+        else:
+            self.replyto(nick, 'This command is only valid during the day.')
+
     def c_vote(self, nick, *args):
-        if len(args) > 1:
+        if len(args) != 1:
             raise KevinBotArgumentException()
         if self.state == ST_DAY:
             if nick in self.players:
@@ -779,4 +807,3 @@ class KevinBotGM:
                 self.replyto(nick, 'You are not in the game.')
         else:
             self.replyto(nick, 'You can only vote during the day.')
-
