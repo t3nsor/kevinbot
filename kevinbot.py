@@ -416,6 +416,8 @@ class KevinBotGM:
             self.getMode()
         else:
             self.users[nick] = ' '
+            if self.state == ST_DAY and nick in self.players:
+                self.mode('+v', nick)
 
     def _kick(self, nick):
         del self.users[nick]
@@ -439,6 +441,11 @@ class KevinBotGM:
             self.my_nick = newnick
         self.users[newnick] = self.users[oldnick]
         del self.users[oldnick]
+        if self.state == ST_DAY:
+            if newnick in self.players and self.users[newnick] == ' ':
+                self.mode('+v', newnick)
+            if newnick not in self.players and self.users[newnick] != ' ':
+                self.mode('-v', newnick)
 
     def _part(self, nick):
         del self.users[nick]
