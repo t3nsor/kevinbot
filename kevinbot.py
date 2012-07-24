@@ -130,10 +130,13 @@ class KevinBotGM:
         '''
         N = len(self.players)
         votes = 0
-        a = [set(self.players.keys())]
+        # a[i] is a set of all players who have received i votes.
+        # This includes the no-lynch option.
+        a = [set(self.players.keys() + [ENT_NONE])]
         for i in range(N):
             a.append(set())
-        b = dict(zip(self.players.keys(), [0] * N))
+        # b[i] is how many votes player i has received.
+        b = dict(zip(self.players.keys() + [ENT_NONE], [0]*(N + 1)))
         for p in self.players.values():
             if p.vote != None:
                 a[b[p.vote]].discard(p.vote)
@@ -157,16 +160,20 @@ class KevinBotGM:
                     break
                 else:
                     return False
-        idiot = self.players[target].__class__ == roles.Idiot
-        self.echo('%s (%s) has been lynched.' % (target,
-                  self.players[target].getRole()))
-        del self.players[target]
-        self.mode('-v', target)
-        if idiot:
-            self.echo('Game over---Village Idiot wins.')
-            self.endGame()
-        elif not self.checkGameOver():
+        if target == ENT_NONE:
+            self.echo('Nobody was lynched.')
             self.startNightMafia()
+        else:
+            idiot = self.players[target].__class__ == roles.Idiot
+            self.echo('%s (%s) has been lynched.' % (target,
+                    self.players[target].getRole()))
+            del self.players[target]
+            self.mode('-v', target)
+            if idiot:
+                self.echo('Game over---Village Idiot wins.')
+                self.endGame()
+            elif not self.checkGameOver():
+                self.startNightMafia()
         return True
 
     def echo(self, msg):
@@ -240,7 +247,10 @@ class KevinBotGM:
                 num = int(value)
                 if num < 0 or num == 0 and setting == OPT_NUM_MAFIA:
                     raise KevinBotArgumentException()
-                if num > 1 and setting == OPT_SELF_PROTECTING_DOCTOR:
+                if num > 1 and setting in [OPT_SELF_PROTECTING_DOCTOR,
+                                           OPT_NO_LYNCH,
+                                           OPT_SELF_LYNCH,
+                                           OPT_SEE_PATIENT]:
                     raise KevinBotArgumentException()
                 self.settings[setting] = num
             except ValueError:
@@ -256,6 +266,8 @@ class KevinBotGM:
                 saved = True
         if saved:
             self.echo('Nobody was killed by the Mafia last night.')
+            if self.settings[OPT_SEE_PATIENT]:
+                self.echo('%s was saved!' % self.victim)
         else:
             self.echo('%s (%s) was killed by the Mafia last night.' %
                         (self.victim, self.players[self.victim].getRole()))
@@ -531,7 +543,10 @@ class KevinBotGM:
                              OPT_NUM_INSPECTORS: 1,
                              OPT_NUM_IDIOTS: 0,
                              OPT_NUM_MAFIA: NUM_MAFIA_AUTO1,
-                             OPT_SELF_PROTECTING_DOCTOR: 1}
+                             OPT_SELF_PROTECTING_DOCTOR: 1,
+                             OPT_NO_LYNCH: 0,
+                             OPT_SELF_LYNCH: 1,
+                             OPT_SEE_PATIENT: 0}
             self.creator = nick
             self.echo('Game created by %s' % nick)
         else:
@@ -737,9 +752,20 @@ class KevinBotGM:
         if self.state == ST_DAY:
             if nick in self.players:
                 if args[0] in self.players:
-                    self.replyto(nick, 'Your vote has been registered.')
-                    self.players[nick].vote = args[0]
-                    self.checkVoteOver()
+                    if args[0] == nick and not self.settings[OPT_SELF_LYNCH]:
+                        self.replyto(nick, 'You cannot vote to lynch ' +
+                                           'yourself.')
+                    else:
+                        self.replyto(nick, 'Your vote has been registered.')
+                        self.players[nick].vote = args[0]
+                        self.checkVoteOver()
+                elif args[0] == ENT_NONE:
+                    if self.settings[OPT_NO_LYNCH]:
+                        self.replyto(nick, 'Your vote has been registered.')
+                        self.players[nick].vote = ENT_NONE
+                        self.checkVoteOver()
+                    else:
+                        self.replyto(nick, 'You cannot vote for no lynch.')
                 else:
                     self.replyto(nick, 'No such player %s' % args[0])
             else:

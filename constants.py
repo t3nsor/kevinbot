@@ -25,9 +25,13 @@ OPT_NUM_INSPECTORS = 'n_detectives'
 OPT_NUM_IDIOTS = 'n_idiots'
 OPT_NUM_MAFIA = 'n_mafia'
 OPT_SELF_PROTECTING_DOCTOR = 'self_protection'
+OPT_NO_LYNCH = 'no_lynch'
+OPT_SELF_LYNCH = 'self_lynch'
+OPT_SEE_PATIENT = 'see_patient'
 # ... and values
 NUM_MAFIA_AUTO1 = 'auto'
 
-# special agents
-AGENT_MAFIA = '*mafia'
-AGENT_TOWN = '*lynch'
+# special entities
+ENT_MAFIA = '*mafia'
+ENT_NONE = '*none'
+ENT_TOWN = '*lynch'
