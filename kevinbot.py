@@ -766,7 +766,7 @@ class KevinBotGM:
                 a.append((p, []))
             b[ENT_NONE] = len(a)
             a.append((ENT_NONE, []))
-            for n, p in .players.items():
+            for n, p in self.players.items():
                 if p.vote:
                     a[b[p.vote]][1].append(n)
                 else:
